@@ -1,0 +1,66 @@
+name: Update a spread sheet
+on:
+  issues:
+    types: [opened]
+jobs:
+  first_job:
+    name: Mark an paper as read in the spread sheet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install libraries
+        run: pip install gspread oauth2client
+      - name: Run a script
+        run: |
+          import json
+          import os
+
+          import gspread
+
+          from oauth2client.service_account import ServiceAccountCredentials
+
+
+          SHEET_NAME = '朝輪プール'
+          PATH_JSON_KEY = '/Users/ryohei/Downloads/asarin-babalab-c0030af21e55.json'
+          DATE_PATTERN = ['[yyyymmdd]', '[yyyy/mm/dd]']
+          TITLE = os.environ.get('TITLE')
+          URL = os.environ.get('URL')
+          NUM_PAPER_TITLE_COLUMN = 3
+          NUM_ISSUE_URL_COLUMN = 5
+          ISSUE_URL_PATTERN = 'https://github.com/babalablab/asarin/issues/'
+
+          # pick information out from a json file, and authenticate
+          scope = ['https://spreadsheets.google.com/feeds',
+                   'https://www.googleapis.com/auth/drive']
+          credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+              json.loads(os.environ.get('JSON_KEY')), scope)
+          gc = gspread.authorize(credentials)
+
+          sheet = gc.open(SHEET_NAME)
+          worksheet = sheet.get_worksheet(0)
+          paper_title_column = worksheet.col_values(NUM_PAPER_TITLE_COLUMN)
+
+
+          candidate = [TITLE]
+          for pattern in DATE_PATTERN:
+              if len(pattern) < len(TITLE):
+                  candidate.append(TITLE[len(pattern):])
+
+          for idx, column in enumerate(paper_title_column):
+              if column in candidate:
+                  value = worksheet.cell(idx+1, NUM_ISSUE_URL_COLUMN).value
+                  if value is None or ISSUE_URL_PATTERN not in value:
+                      worksheet.update_cell(idx+1, NUM_ISSUE_URL_COLUMN, URL)
+
+                  break
+
+        shell: python
+        env:
+          URL: ${{ github.event.issue.html_url }}
+          TITLE: ${{ github.event.issue.title }}
+          JSON_KEY: ${{ secrets.JSON_KEY }}
+
