@@ -62,5 +62,5 @@ jobs:
         env:
           URL: ${{ github.event.issue.html_url }}
           TITLE: ${{ github.event.issue.title }}
-          JSON_KEY: ${{ secrets.JSON_KEY }}
+          JSON_KEY: ${{ secrets.SPREAD_SHEET_JSON_KEY }}
 
