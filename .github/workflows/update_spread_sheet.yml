@@ -56,7 +56,7 @@ jobs:
                   value = worksheet.cell(idx+1, NUM_ISSUE_URL_COLUMN).value
                   if value is None or ISSUE_URL_PATTERN not in value:
                       worksheet.update_cell(idx+1, NUM_ISSUE_URL_COLUMN, URL)
-                      worksheet.update(idx+1, NUM_CHECKBOX_COLUMN, True)
+                      worksheet.update_cell(idx+1, NUM_CHECKBOX_COLUMN, True)
 
                   break
 
