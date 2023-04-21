@@ -27,6 +27,7 @@ jobs:
           SHEET_NAME = '朝輪プール'
           TITLE = os.environ.get('TITLE')
           URL = os.environ.get('URL')
+          NUM_CHECKBOX_COLUMN = 1
           NUM_PAPER_TITLE_COLUMN = 3
           NUM_ISSUE_URL_COLUMN = 5
           DATE_PATTERN = ['[yyyymmdd]', '[yyyy/mm/dd]', '[yyyymmdd] ', '[yyyy/mm/dd] ']
@@ -49,12 +50,13 @@ jobs:
               if len(pattern) < len(TITLE):
                   candidate.append(TITLE[len(pattern):])
 
-          # search the paper and write the issue URL
+          # search the paper, write the issue URL, and tick a checkbox
           for idx, column in enumerate(paper_title_column):
               if column in candidate:
                   value = worksheet.cell(idx+1, NUM_ISSUE_URL_COLUMN).value
                   if value is None or ISSUE_URL_PATTERN not in value:
                       worksheet.update_cell(idx+1, NUM_ISSUE_URL_COLUMN, URL)
+                      worksheet.update(idx+1, NUM_CHECKBOX_COLUMN, True)
 
                   break
 
